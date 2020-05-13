@@ -18,13 +18,14 @@ Platform::String^ AngleKey = "Angle";
 Platform::String^ TrackingKey = "Tracking";
 
 // Loads vertex and pixel shaders from files and instantiates the cube geometry.
-Sample3DSceneRenderer::Sample3DSceneRenderer(const std::shared_ptr<DX::DeviceResources>& deviceResources) :
+Sample3DSceneRenderer::Sample3DSceneRenderer(const std::shared_ptr<DX::DeviceResources>& deviceResources, std::shared_ptr<Camera> camera) :
 	m_loadingComplete(false),
 	m_radiansPerSecond(XM_PIDIV4),	// rotate 45 degrees per second
 	m_angle(0),
 	m_tracking(false),
 	m_mappedConstantBuffer(nullptr),
-	m_deviceResources(deviceResources)
+	m_deviceResources(deviceResources),
+	m_camera(camera)
 {
 	LoadState();
 	ZeroMemory(&m_constantBufferData, sizeof(m_constantBufferData));
@@ -339,13 +340,6 @@ void Sample3DSceneRenderer::CreateWindowSizeDependentResources()
 		&m_constantBufferData.projection,
 		XMMatrixTranspose(perspectiveMatrix * orientationMatrix)
 		);
-
-	// Eye is at (0,0.7,1.5), looking at point (0,-0.1,0) with the up-vector along the y-axis.
-	static const XMVECTORF32 eye = { 0.0f, 0.7f, 1.5f, 0.0f };
-	static const XMVECTORF32 at = { 0.0f, -0.1f, 0.0f, 0.0f };
-	static const XMVECTORF32 up = { 0.0f, 1.0f, 0.0f, 0.0f };
-
-	XMStoreFloat4x4(&m_constantBufferData.view, XMMatrixTranspose(XMMatrixLookAtRH(eye, at, up)));
 }
 
 // Called once per frame, rotates the cube and calculates the model and view matrices.
@@ -360,6 +354,13 @@ void Sample3DSceneRenderer::Update(DX::StepTimer const& timer)
 
 			Rotate(m_angle);
 		}
+
+		// Update view matrix
+		static const XMVECTORF32 eye = { m_camera->GetCameraPosition().x, m_camera->GetCameraPosition().y, m_camera->GetCameraPosition().z, 0.0f };
+		static const XMVECTORF32 at = { m_camera->m_ForwardVector.x, m_camera->m_ForwardVector.y, m_camera->m_ForwardVector.z, 0.0f };
+		static const XMVECTORF32 up = { m_camera->m_UpVector.x, m_camera->m_UpVector.y, m_camera->m_UpVector.z, 0.0f };
+
+		XMStoreFloat4x4(&m_constantBufferData.view, XMMatrixTranspose(XMMatrixLookAtRH(eye, at, up)));
 
 		// Update the constant buffer resource.
 		UINT8* destination = m_mappedConstantBuffer + (m_deviceResources->GetCurrentFrameIndex() * c_alignedConstantBufferSize);

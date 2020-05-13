@@ -319,7 +319,7 @@ inline Mat4f Perspective(float fovyDegrees, float aspectRatio, float zNear, floa
 				Vec4f(0.0f, 0.0f, -1.0f, 0.0f));*/
 
 	const float zRange = zNear - zFar;
-	const float tanHalfFOV = tanf(DegreesToRadians * (fovyDegrees / 2.0));
+	const float tanHalfFOV = tanf(DegreesToRadians * (fovyDegrees / 2.0f));
 
 	Mat4f m;
 

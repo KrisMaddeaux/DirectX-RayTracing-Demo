@@ -4,6 +4,8 @@
 #include "Common\DeviceResources.h"
 #include "Content\Sample3DSceneRenderer.h"
 
+#include "Camera.h"
+
 // Renders Direct3D content on the screen.
 namespace DirectX_RayTracing_Demo
 {
@@ -23,6 +25,7 @@ namespace DirectX_RayTracing_Demo
 	private:
 		// TODO: Replace with your own content renderers.
 		std::unique_ptr<Sample3DSceneRenderer> m_sceneRenderer;
+		std::shared_ptr<Camera> m_camera;
 
 		// Rendering loop timer.
 		DX::StepTimer m_timer;

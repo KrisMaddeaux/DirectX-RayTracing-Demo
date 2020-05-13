@@ -4,13 +4,15 @@
 #include "ShaderStructures.h"
 #include "..\Common\StepTimer.h"
 
+#include "Code/Camera.h"
+
 namespace DirectX_RayTracing_Demo
 {
 	// This sample renderer instantiates a basic rendering pipeline.
 	class Sample3DSceneRenderer
 	{
 	public:
-		Sample3DSceneRenderer(const std::shared_ptr<DX::DeviceResources>& deviceResources);
+		Sample3DSceneRenderer(const std::shared_ptr<DX::DeviceResources>& deviceResources, std::shared_ptr<Camera> camera);
 		~Sample3DSceneRenderer();
 		void CreateDeviceDependentResources();
 		void CreateWindowSizeDependentResources();
@@ -33,6 +35,8 @@ namespace DirectX_RayTracing_Demo
 
 		// Cached pointer to device resources.
 		std::shared_ptr<DX::DeviceResources> m_deviceResources;
+
+		std::shared_ptr<Camera> m_camera;
 
 		// Direct3D resources for cube geometry.
 		Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>	m_commandList;

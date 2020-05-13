@@ -17,6 +17,11 @@ namespace DX
 		void Present();
 		void WaitForGpu();
 
+		Windows::UI::Core::CoreWindow^ GetWindow() const 
+		{
+			return m_window.Get();
+		}
+
 		// The size of the render target, in pixels.
 		Windows::Foundation::Size	GetOutputSize() const				{ return m_outputSize; }
 

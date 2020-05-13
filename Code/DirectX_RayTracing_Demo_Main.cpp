@@ -18,13 +18,17 @@ DirectX_RayTracing_DemoMain::DirectX_RayTracing_DemoMain()
 	m_timer.SetFixedTimeStep(true);
 	m_timer.SetTargetElapsedSeconds(1.0 / 60);
 	*/
+
+	m_camera = std::shared_ptr<Camera>(new Camera());
+	m_camera->SetCameraPosition(0.0f, 0.7f, 1.5f);
+	m_camera->SetCameraTarget(0.0f, -0.1f, 0.0f);
 }
 
 // Creates and initializes the renderers.
 void DirectX_RayTracing_DemoMain::CreateRenderers(const std::shared_ptr<DX::DeviceResources>& deviceResources)
 {
 	// TODO: Replace this with your app's content initialization.
-	m_sceneRenderer = std::unique_ptr<Sample3DSceneRenderer>(new Sample3DSceneRenderer(deviceResources));
+	m_sceneRenderer = std::unique_ptr<Sample3DSceneRenderer>(new Sample3DSceneRenderer(deviceResources, m_camera));
 
 	OnWindowSizeChanged();
 }

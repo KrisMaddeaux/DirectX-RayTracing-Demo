@@ -243,6 +243,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Code\App.h" />
+    <ClInclude Include="Code\Camera.h" />
     <ClInclude Include="Code\Common\d3dx12.h" />
     <ClInclude Include="Code\Common\DeviceResources.h" />
     <ClInclude Include="Code\DirectX_RayTracing_Demo_Main.h" />
@@ -250,13 +251,16 @@
     <ClInclude Include="Code\Common\StepTimer.h" />
     <ClInclude Include="Code\Content\Sample3DSceneRenderer.h" />
     <ClInclude Include="Code\Content\ShaderStructures.h" />
+    <ClInclude Include="Code\MathClass.h" />
     <ClInclude Include="Code\pch.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Code\App.cpp" />
+    <ClCompile Include="Code\Camera.cpp" />
     <ClCompile Include="Code\Common\DeviceResources.cpp" />
     <ClCompile Include="Code\DirectX_RayTracing_Demo_Main.cpp" />
     <ClCompile Include="Code\Content\Sample3DSceneRenderer.cpp" />
+    <ClCompile Include="Code\MathClass.cpp" />
     <ClCompile Include="Code\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>

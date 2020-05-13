@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "MathClass.h"
 
 Vec3f::Vec3f()
