@@ -31,6 +31,8 @@ namespace DirectX_RayTracing_Demo
 		void OnWindowClosed(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::CoreWindowEventArgs^ args);
 		void OnKeyDown(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::KeyEventArgs^ args);
 
+		void OnMouseMoved(Windows::Devices::Input::MouseDevice^ mouseDevice, Windows::Devices::Input::MouseEventArgs^ args);
+
 		// DisplayInformation event handlers.
 		void OnDpiChanged(Windows::Graphics::Display::DisplayInformation^ sender, Platform::Object^ args);
 		void OnOrientationChanged(Windows::Graphics::Display::DisplayInformation^ sender, Platform::Object^ args);
@@ -41,7 +43,7 @@ namespace DirectX_RayTracing_Demo
 		std::shared_ptr<DX::DeviceResources> GetDeviceResources();
 
 		std::shared_ptr<DX::DeviceResources> m_deviceResources;
-		std::unique_ptr<DirectX_RayTracing_DemoMain> m_main;
+		std::unique_ptr<DirectX_RayTracing_Demo_Main> m_main;
 		bool m_windowClosed;
 		bool m_windowVisible;
 	};

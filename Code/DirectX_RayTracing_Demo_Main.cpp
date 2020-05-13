@@ -10,7 +10,7 @@ using namespace Concurrency;
 // The DirectX 12 Application template is documented at https://go.microsoft.com/fwlink/?LinkID=613670&clcid=0x409
 
 // Loads and initializes application assets when the application is loaded.
-DirectX_RayTracing_DemoMain::DirectX_RayTracing_DemoMain()
+DirectX_RayTracing_Demo_Main::DirectX_RayTracing_Demo_Main()
 {
 	// TODO: Change the timer settings if you want something other than the default variable timestep mode.
 	// e.g. for 60 FPS fixed timestep update logic, call:
@@ -25,7 +25,7 @@ DirectX_RayTracing_DemoMain::DirectX_RayTracing_DemoMain()
 }
 
 // Creates and initializes the renderers.
-void DirectX_RayTracing_DemoMain::CreateRenderers(const std::shared_ptr<DX::DeviceResources>& deviceResources)
+void DirectX_RayTracing_Demo_Main::CreateRenderers(const std::shared_ptr<DX::DeviceResources>& deviceResources)
 {
 	// TODO: Replace this with your app's content initialization.
 	m_sceneRenderer = std::unique_ptr<Sample3DSceneRenderer>(new Sample3DSceneRenderer(deviceResources, m_camera));
@@ -34,7 +34,7 @@ void DirectX_RayTracing_DemoMain::CreateRenderers(const std::shared_ptr<DX::Devi
 }
 
 // Updates the application state once per frame.
-void DirectX_RayTracing_DemoMain::Update()
+void DirectX_RayTracing_Demo_Main::Update()
 {
 	// Update scene objects.
 	m_timer.Tick([&]()
@@ -46,7 +46,7 @@ void DirectX_RayTracing_DemoMain::Update()
 
 // Renders the current frame according to the current application state.
 // Returns true if the frame was rendered and is ready to be displayed.
-bool DirectX_RayTracing_DemoMain::Render()
+bool DirectX_RayTracing_Demo_Main::Render()
 {
 	// Don't try to render anything before the first Update.
 	if (m_timer.GetFrameCount() == 0)
@@ -60,14 +60,14 @@ bool DirectX_RayTracing_DemoMain::Render()
 }
 
 // Updates application state when the window's size changes (e.g. device orientation change)
-void DirectX_RayTracing_DemoMain::OnWindowSizeChanged()
+void DirectX_RayTracing_Demo_Main::OnWindowSizeChanged()
 {
 	// TODO: Replace this with the size-dependent initialization of your app's content.
 	m_sceneRenderer->CreateWindowSizeDependentResources();
 }
 
 // Notifies the app that it is being suspended.
-void DirectX_RayTracing_DemoMain::OnSuspending()
+void DirectX_RayTracing_Demo_Main::OnSuspending()
 {
 	// TODO: Replace this with your app's suspending logic.
 
@@ -81,13 +81,13 @@ void DirectX_RayTracing_DemoMain::OnSuspending()
 }
 
 // Notifes the app that it is no longer suspended.
-void DirectX_RayTracing_DemoMain::OnResuming()
+void DirectX_RayTracing_Demo_Main::OnResuming()
 {
 	// TODO: Replace this with your app's resuming logic.
 }
 
 // Notifies renderers that device resources need to be released.
-void DirectX_RayTracing_DemoMain::OnDeviceRemoved()
+void DirectX_RayTracing_Demo_Main::OnDeviceRemoved()
 {
 	// TODO: Save any necessary application or renderer state and release the renderer
 	// and its resources which are no longer valid.

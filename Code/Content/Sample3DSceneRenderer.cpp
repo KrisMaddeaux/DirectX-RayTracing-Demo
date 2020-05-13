@@ -356,11 +356,7 @@ void Sample3DSceneRenderer::Update(DX::StepTimer const& timer)
 		}
 
 		// Update view matrix
-		static const XMVECTORF32 eye = { m_camera->GetCameraPosition().x, m_camera->GetCameraPosition().y, m_camera->GetCameraPosition().z, 0.0f };
-		static const XMVECTORF32 at = { m_camera->m_ForwardVector.x, m_camera->m_ForwardVector.y, m_camera->m_ForwardVector.z, 0.0f };
-		static const XMVECTORF32 up = { m_camera->m_UpVector.x, m_camera->m_UpVector.y, m_camera->m_UpVector.z, 0.0f };
-
-		XMStoreFloat4x4(&m_constantBufferData.view, XMMatrixTranspose(XMMatrixLookAtRH(eye, at, up)));
+		XMStoreFloat4x4(&m_constantBufferData.view, m_camera->GetViewMatrixDirectX());
 
 		// Update the constant buffer resource.
 		UINT8* destination = m_mappedConstantBuffer + (m_deviceResources->GetCurrentFrameIndex() * c_alignedConstantBufferSize);

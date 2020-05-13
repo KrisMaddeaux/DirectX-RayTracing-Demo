@@ -58,17 +58,14 @@ void App::Initialize(CoreApplicationView^ applicationView)
 void App::SetWindow(CoreWindow^ window)
 {
 	window->SizeChanged += ref new TypedEventHandler<CoreWindow^, WindowSizeChangedEventArgs^>(this, &App::OnWindowSizeChanged);
-
 	window->VisibilityChanged += ref new TypedEventHandler<CoreWindow^, VisibilityChangedEventArgs^>(this, &App::OnVisibilityChanged);
-
 	window->Closed += ref new TypedEventHandler<CoreWindow^, CoreWindowEventArgs^>(this, &App::OnWindowClosed);
-
 	window->KeyDown += ref new TypedEventHandler<CoreWindow^, KeyEventArgs^>(this, &App::OnKeyDown);
 
+	Windows::Devices::Input::MouseDevice::GetForCurrentView()->MouseMoved += ref new TypedEventHandler<Windows::Devices::Input::MouseDevice^, Windows::Devices::Input::MouseEventArgs^>(this, &App::OnMouseMoved);
+
 	DisplayInformation^ currentDisplayInformation = DisplayInformation::GetForCurrentView();
-
 	currentDisplayInformation->DpiChanged += ref new TypedEventHandler<DisplayInformation^, Object^>(this, &App::OnDpiChanged);
-
 	currentDisplayInformation->OrientationChanged += ref new TypedEventHandler<DisplayInformation^, Object^>(this, &App::OnOrientationChanged);
 
 	DisplayInformation::DisplayContentsInvalidated += ref new TypedEventHandler<DisplayInformation^, Object^>(this, &App::OnDisplayContentsInvalidated);
@@ -79,7 +76,7 @@ void App::Load(Platform::String^ entryPoint)
 {
 	if (m_main == nullptr)
 	{
-		m_main = std::unique_ptr<DirectX_RayTracing_DemoMain>(new DirectX_RayTracing_DemoMain());
+		m_main = std::unique_ptr<DirectX_RayTracing_Demo_Main>(new DirectX_RayTracing_Demo_Main());
 	}
 }
 
@@ -179,10 +176,39 @@ void App::OnKeyDown(CoreWindow^ sender, KeyEventArgs^ args)
 	case VirtualKey::Escape:
 		m_windowClosed = true;
 		break;
+	case VirtualKey::A:
+	{
+		Vec3f l_newPos = m_main->GetCamera()->m_RightVector * -(m_main->GetCamera()->m_speed * m_main->GetTimer().GetElapsedSeconds());
+		m_main->GetCamera()->TranslateCamera(l_newPos.x, l_newPos.y, l_newPos.z);
+		break;
+	}
+	case VirtualKey::S:
+	{
+		Vec3f l_newPos = m_main->GetCamera()->m_ForwardVector * -(m_main->GetCamera()->m_speed * m_main->GetTimer().GetElapsedSeconds());
+		m_main->GetCamera()->TranslateCamera(l_newPos.x, l_newPos.y, l_newPos.z);
+		break;
+	}
+	case VirtualKey::D:
+	{
+		Vec3f l_newPos = m_main->GetCamera()->m_RightVector * (m_main->GetCamera()->m_speed * m_main->GetTimer().GetElapsedSeconds());
+		m_main->GetCamera()->TranslateCamera(l_newPos.x, l_newPos.y, l_newPos.z);
+		break;
+	}
+	case VirtualKey::W:
+	{
+		Vec3f l_newPos = m_main->GetCamera()->m_ForwardVector * (m_main->GetCamera()->m_speed * m_main->GetTimer().GetElapsedSeconds());
+		m_main->GetCamera()->TranslateCamera(l_newPos.x, l_newPos.y, l_newPos.z);
+		break;
+	}
 	default:
 		break;
 	}
-	m_windowClosed = true;
+}
+
+void App::OnMouseMoved(Windows::Devices::Input::MouseDevice^ mouseDevice, Windows::Devices::Input::MouseEventArgs^ args)
+{
+	Vec3f deltaDir = Vec3f(args->MouseDelta.X, args->MouseDelta.Y, 0.0f).normalize();
+	m_main->GetCamera()->RotateCamera(deltaDir.x, deltaDir.y, 0.0f);
 }
 
 // DisplayInformation event handlers.

@@ -9,10 +9,10 @@
 // Renders Direct3D content on the screen.
 namespace DirectX_RayTracing_Demo
 {
-	class DirectX_RayTracing_DemoMain
+	class DirectX_RayTracing_Demo_Main
 	{
 	public:
-		DirectX_RayTracing_DemoMain();
+		DirectX_RayTracing_Demo_Main();
 		void CreateRenderers(const std::shared_ptr<DX::DeviceResources>& deviceResources);
 		void Update();
 		bool Render();
@@ -21,6 +21,16 @@ namespace DirectX_RayTracing_Demo
 		void OnSuspending();
 		void OnResuming();
 		void OnDeviceRemoved();
+
+		std::shared_ptr<Camera> GetCamera()
+		{
+			return m_camera;
+		}
+
+		DX::StepTimer GetTimer()
+		{
+			return m_timer;
+		}
 
 	private:
 		// TODO: Replace with your own content renderers.

@@ -1,5 +1,5 @@
 #pragma once
-
+#include <DirectXMath.h>
 #include "MathClass.h"
 
 class Camera {
@@ -24,6 +24,7 @@ public:
 	Vec3f GetCameraTarget();
 	Vec3f GetCameraPosition();
 	Mat4f GetViewMatrix(); //used to bring world space coordinates into eye/camera space 
+	DirectX::XMMATRIX GetViewMatrixDirectX(); // Get the view matrix in the format directX expects
 
 	//Frenet Frame
 	Vec3f m_ForwardVector;
@@ -34,8 +35,6 @@ public:
 
 private:
 	void UpdateCamera();
-
-	Vec3f m_StartingForwardVector;
 
 	Vec3f m_position; 
 	Vec3f m_target; //look at position
