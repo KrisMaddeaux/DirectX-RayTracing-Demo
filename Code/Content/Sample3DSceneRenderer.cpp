@@ -44,77 +44,24 @@ void Sample3DSceneRenderer::CreateDeviceDependentResources()
 {
 	auto d3dDevice = m_deviceResources->GetD3DDevice();
 
-	// Create a root signature with a single constant buffer slot.
-	{
-		CD3DX12_DESCRIPTOR_RANGE range;
-		CD3DX12_ROOT_PARAMETER parameter;
+	// Load shaders
+	m_shader = std::shared_ptr<ShaderProgramHLSL>(new ShaderProgramHLSL(m_deviceResources));
+	auto createVSTask = DX::ReadDataAsync(L"SampleVertexShader.cso").then([this](std::vector<byte>& fileData) {m_shader->SetVertexShader(fileData); });
+	auto createPSTask = DX::ReadDataAsync(L"SamplePixelShader.cso").then([this](std::vector<byte>& fileData) {m_shader->SetPixelShader(fileData); });
 
-		range.Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 0);
-		parameter.InitAsDescriptorTable(1, &range, D3D12_SHADER_VISIBILITY_VERTEX);
-
-		D3D12_ROOT_SIGNATURE_FLAGS rootSignatureFlags =
-			D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT | // Only the input assembler stage needs access to the constant buffer.
-			D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS |
-			D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS |
-			D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS |
-			D3D12_ROOT_SIGNATURE_FLAG_DENY_PIXEL_SHADER_ROOT_ACCESS;
-
-		CD3DX12_ROOT_SIGNATURE_DESC descRootSignature;
-		descRootSignature.Init(1, &parameter, 0, nullptr, rootSignatureFlags);
-
-		ComPtr<ID3DBlob> pSignature;
-		ComPtr<ID3DBlob> pError;
-		DX::ThrowIfFailed(D3D12SerializeRootSignature(&descRootSignature, D3D_ROOT_SIGNATURE_VERSION_1, pSignature.GetAddressOf(), pError.GetAddressOf()));
-		DX::ThrowIfFailed(d3dDevice->CreateRootSignature(0, pSignature->GetBufferPointer(), pSignature->GetBufferSize(), IID_PPV_ARGS(&m_rootSignature)));
-        NAME_D3D12_OBJECT(m_rootSignature);
-	}
-
-	// Load shaders asynchronously.
-	auto createVSTask = DX::ReadDataAsync(L"SampleVertexShader.cso").then([this](std::vector<byte>& fileData) {
-		m_vertexShader = fileData;
-	});
-
-	auto createPSTask = DX::ReadDataAsync(L"SamplePixelShader.cso").then([this](std::vector<byte>& fileData) {
-		m_pixelShader = fileData;
-	});
-
-	// Create the pipeline state once the shaders are loaded.
-	auto createPipelineStateTask = (createPSTask && createVSTask).then([this]() {
-
-		static const D3D12_INPUT_ELEMENT_DESC inputLayout[] =
+	// Setup shader programs
+	auto createPipelineStateTask = (createPSTask && createVSTask).then([this]()
 		{
-			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-			{ "COLOR", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-		};
-
-		D3D12_GRAPHICS_PIPELINE_STATE_DESC state = {};
-		state.InputLayout = { inputLayout, _countof(inputLayout) };
-		state.pRootSignature = m_rootSignature.Get();
-        state.VS = CD3DX12_SHADER_BYTECODE(&m_vertexShader[0], m_vertexShader.size());
-        state.PS = CD3DX12_SHADER_BYTECODE(&m_pixelShader[0], m_pixelShader.size());
-		state.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
-		state.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
-		state.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
-		state.SampleMask = UINT_MAX;
-		state.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-		state.NumRenderTargets = 1;
-		state.RTVFormats[0] = m_deviceResources->GetBackBufferFormat();
-		state.DSVFormat = m_deviceResources->GetDepthBufferFormat();
-		state.SampleDesc.Count = 1;
-
-		DX::ThrowIfFailed(m_deviceResources->GetD3DDevice()->CreateGraphicsPipelineState(&state, IID_PPV_ARGS(&m_pipelineState)));
-
-		// Shader data can be deleted once the pipeline state is created.
-		m_vertexShader.clear();
-		m_pixelShader.clear();
-	});
+			m_shader->Setup();
+			m_shader->ClearShaders(); // no longer need the data
+		});
 
 	// Create and upload cube geometry resources to the GPU.
 	auto createAssetsTask = createPipelineStateTask.then([this]() {
 		auto d3dDevice = m_deviceResources->GetD3DDevice();
 
 		// Create a command list.
-		DX::ThrowIfFailed(d3dDevice->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_deviceResources->GetCommandAllocator(), m_pipelineState.Get(), IID_PPV_ARGS(&m_commandList)));
+		DX::ThrowIfFailed(d3dDevice->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_deviceResources->GetCommandAllocator(), m_shader->GetPipelineState(), IID_PPV_ARGS(&m_commandList)));
         NAME_D3D12_OBJECT(m_commandList);
 
 		// Cube vertices. Each vertex has a position and a color.
@@ -437,12 +384,12 @@ bool Sample3DSceneRenderer::Render()
 	DX::ThrowIfFailed(m_deviceResources->GetCommandAllocator()->Reset());
 
 	// The command list can be reset anytime after ExecuteCommandList() is called.
-	DX::ThrowIfFailed(m_commandList->Reset(m_deviceResources->GetCommandAllocator(), m_pipelineState.Get()));
+	DX::ThrowIfFailed(m_commandList->Reset(m_deviceResources->GetCommandAllocator(), m_shader->GetPipelineState()));
 
 	PIXBeginEvent(m_commandList.Get(), 0, L"Draw the cube");
 	{
 		// Set the graphics root signature and descriptor heaps to be used by this frame.
-		m_commandList->SetGraphicsRootSignature(m_rootSignature.Get());
+		m_commandList->SetGraphicsRootSignature(m_shader->GetRootSignature());
 		ID3D12DescriptorHeap* ppHeaps[] = { m_cbvHeap.Get() };
 		m_commandList->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);
 

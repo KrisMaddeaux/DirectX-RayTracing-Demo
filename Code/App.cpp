@@ -178,25 +178,25 @@ void App::OnKeyDown(CoreWindow^ sender, KeyEventArgs^ args)
 		break;
 	case VirtualKey::A:
 	{
-		Vec3f l_newPos = m_main->GetCamera()->m_RightVector * -(m_main->GetCamera()->m_speed * m_main->GetTimer().GetElapsedSeconds());
+		Vec3f l_newPos = m_main->GetCamera()->m_RightVector * -(m_main->GetCamera()->m_speed * static_cast<float>(m_main->GetTimer().GetElapsedSeconds()));
 		m_main->GetCamera()->TranslateCamera(l_newPos.x, l_newPos.y, l_newPos.z);
 		break;
 	}
 	case VirtualKey::S:
 	{
-		Vec3f l_newPos = m_main->GetCamera()->m_ForwardVector * -(m_main->GetCamera()->m_speed * m_main->GetTimer().GetElapsedSeconds());
+		Vec3f l_newPos = m_main->GetCamera()->m_ForwardVector * -(m_main->GetCamera()->m_speed * static_cast<float>(m_main->GetTimer().GetElapsedSeconds()));
 		m_main->GetCamera()->TranslateCamera(l_newPos.x, l_newPos.y, l_newPos.z);
 		break;
 	}
 	case VirtualKey::D:
 	{
-		Vec3f l_newPos = m_main->GetCamera()->m_RightVector * (m_main->GetCamera()->m_speed * m_main->GetTimer().GetElapsedSeconds());
+		Vec3f l_newPos = m_main->GetCamera()->m_RightVector * (m_main->GetCamera()->m_speed * static_cast<float>(m_main->GetTimer().GetElapsedSeconds()));
 		m_main->GetCamera()->TranslateCamera(l_newPos.x, l_newPos.y, l_newPos.z);
 		break;
 	}
 	case VirtualKey::W:
 	{
-		Vec3f l_newPos = m_main->GetCamera()->m_ForwardVector * (m_main->GetCamera()->m_speed * m_main->GetTimer().GetElapsedSeconds());
+		Vec3f l_newPos = m_main->GetCamera()->m_ForwardVector * (m_main->GetCamera()->m_speed * static_cast<float>(m_main->GetTimer().GetElapsedSeconds()));
 		m_main->GetCamera()->TranslateCamera(l_newPos.x, l_newPos.y, l_newPos.z);
 		break;
 	}
@@ -207,7 +207,7 @@ void App::OnKeyDown(CoreWindow^ sender, KeyEventArgs^ args)
 
 void App::OnMouseMoved(Windows::Devices::Input::MouseDevice^ mouseDevice, Windows::Devices::Input::MouseEventArgs^ args)
 {
-	Vec3f deltaDir = Vec3f(args->MouseDelta.X, args->MouseDelta.Y, 0.0f).normalize();
+	Vec3f deltaDir = Vec3f(static_cast<float>(args->MouseDelta.X), static_cast<float>(args->MouseDelta.Y), 0.0f).normalize();
 	m_main->GetCamera()->RotateCamera(deltaDir.x, deltaDir.y, 0.0f);
 }
 

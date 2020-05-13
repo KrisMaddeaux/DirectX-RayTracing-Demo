@@ -5,6 +5,7 @@
 #include "..\Common\StepTimer.h"
 
 #include "Code/Camera.h"
+#include "Code/ShaderProgramHLSL.h"
 
 namespace DirectX_RayTracing_Demo
 {
@@ -38,10 +39,10 @@ namespace DirectX_RayTracing_Demo
 
 		std::shared_ptr<Camera> m_camera;
 
+		std::shared_ptr<ShaderProgramHLSL> m_shader;
+
 		// Direct3D resources for cube geometry.
 		Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>	m_commandList;
-		Microsoft::WRL::ComPtr<ID3D12RootSignature>			m_rootSignature;
-		Microsoft::WRL::ComPtr<ID3D12PipelineState>			m_pipelineState;
 		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>		m_cbvHeap;
 		Microsoft::WRL::ComPtr<ID3D12Resource>				m_vertexBuffer;
 		Microsoft::WRL::ComPtr<ID3D12Resource>				m_indexBuffer;
@@ -50,8 +51,6 @@ namespace DirectX_RayTracing_Demo
 		UINT8*												m_mappedConstantBuffer;
 		UINT												m_cbvDescriptorSize;
 		D3D12_RECT											m_scissorRect;
-		std::vector<byte>									m_vertexShader;
-		std::vector<byte>									m_pixelShader;
 		D3D12_VERTEX_BUFFER_VIEW							m_vertexBufferView;
 		D3D12_INDEX_BUFFER_VIEW								m_indexBufferView;
 

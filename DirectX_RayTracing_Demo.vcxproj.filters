@@ -50,6 +50,7 @@
     <ClCompile Include="Code\DirectX_RayTracing_Demo_Main.cpp" />
     <ClCompile Include="Code\Camera.cpp" />
     <ClCompile Include="Code\MathClass.cpp" />
+    <ClCompile Include="Code\ShaderProgramHLSL.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Code\App.h" />
@@ -58,6 +59,7 @@
     <ClInclude Include="Code\DirectX_RayTracing_Demo_Main.h" />
     <ClInclude Include="Code\Camera.h" />
     <ClInclude Include="Code\MathClass.h" />
+    <ClInclude Include="Code\ShaderProgramHLSL.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\LockScreenLogo.scale-200.png">
