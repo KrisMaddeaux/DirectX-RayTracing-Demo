@@ -65,7 +65,7 @@ namespace DX
 		UINT											m_currentFrame;
 
 		// Direct3D objects.
-		Microsoft::WRL::ComPtr<ID3D12Device>			m_d3dDevice;
+		Microsoft::WRL::ComPtr<ID3D12Device5>			m_d3dDevice;
 		Microsoft::WRL::ComPtr<IDXGIFactory4>			m_dxgiFactory;
 		Microsoft::WRL::ComPtr<IDXGISwapChain3>			m_swapChain;
 		Microsoft::WRL::ComPtr<ID3D12Resource>			m_renderTargets[c_frameCount];

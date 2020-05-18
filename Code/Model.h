@@ -54,7 +54,7 @@ private:
     std::shared_ptr<ShaderProgramHLSL> m_shader;
 
     // Direct3D resources for geometry.
-    Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>	m_commandList;
+    Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4>	m_commandList;
     Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>		m_cbvHeap;
     Microsoft::WRL::ComPtr<ID3D12Resource>				m_vertexBuffer;
     Microsoft::WRL::ComPtr<ID3D12Resource>				m_indexBuffer;

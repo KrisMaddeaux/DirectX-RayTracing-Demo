@@ -40,6 +40,14 @@ Sample3DSceneRenderer::~Sample3DSceneRenderer()
 
 void Sample3DSceneRenderer::CreateDeviceDependentResources()
 {
+	// Check Raytracing support
+	D3D12_FEATURE_DATA_D3D12_OPTIONS5 options5 = {};
+	DX::ThrowIfFailed(m_deviceResources->GetD3DDevice()->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS5, &options5, sizeof(options5)));
+	if (options5.RaytracingTier < D3D12_RAYTRACING_TIER_1_0)
+	{
+		throw std::runtime_error("Raytracing not supported on device");
+	}
+
 	// Load shaders
 	m_shader = std::shared_ptr<ShaderProgramHLSL>(new ShaderProgramHLSL(m_deviceResources));
 	auto createVSTask = DX::ReadDataAsync(L"SampleVertexShader.cso").then([this](std::vector<byte>& fileData) {m_shader->SetVertexShader(fileData); });
