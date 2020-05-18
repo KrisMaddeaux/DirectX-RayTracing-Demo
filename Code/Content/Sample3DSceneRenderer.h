@@ -6,6 +6,7 @@
 
 #include "Code/Camera.h"
 #include "Code/ShaderProgramHLSL.h"
+#include "Code/Model.h"
 
 namespace DirectX_RayTracing_Demo
 {
@@ -21,14 +22,8 @@ namespace DirectX_RayTracing_Demo
 		bool Render();
 		void SaveState();
 
-		void StartTracking();
-		void TrackingUpdate(float positionX);
-		void StopTracking();
-		bool IsTracking() { return m_tracking; }
-
 	private:
 		void LoadState();
-		void Rotate(float radians);
 
 	private:
 		// Constant buffers must be 256-byte aligned.
@@ -41,24 +36,15 @@ namespace DirectX_RayTracing_Demo
 
 		std::shared_ptr<ShaderProgramHLSL> m_shader;
 
+		std::shared_ptr<Model> m_cube;
+
 		// Direct3D resources for cube geometry.
-		Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>	m_commandList;
-		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>		m_cbvHeap;
-		Microsoft::WRL::ComPtr<ID3D12Resource>				m_vertexBuffer;
-		Microsoft::WRL::ComPtr<ID3D12Resource>				m_indexBuffer;
-		Microsoft::WRL::ComPtr<ID3D12Resource>				m_constantBuffer;
 		ModelViewProjectionConstantBuffer					m_constantBufferData;
-		UINT8*												m_mappedConstantBuffer;
-		UINT												m_cbvDescriptorSize;
 		D3D12_RECT											m_scissorRect;
-		D3D12_VERTEX_BUFFER_VIEW							m_vertexBufferView;
-		D3D12_INDEX_BUFFER_VIEW								m_indexBufferView;
 
 		// Variables used with the rendering loop.
 		bool	m_loadingComplete;
 		float	m_radiansPerSecond;
-		float	m_angle;
-		bool	m_tracking;
 	};
 }
 

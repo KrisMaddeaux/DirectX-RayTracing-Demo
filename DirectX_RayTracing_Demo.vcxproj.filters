@@ -51,6 +51,7 @@
     <ClCompile Include="Code\Camera.cpp" />
     <ClCompile Include="Code\MathClass.cpp" />
     <ClCompile Include="Code\ShaderProgramHLSL.cpp" />
+    <ClCompile Include="Code\Model.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Code\App.h" />
@@ -60,6 +61,8 @@
     <ClInclude Include="Code\Camera.h" />
     <ClInclude Include="Code\MathClass.h" />
     <ClInclude Include="Code\ShaderProgramHLSL.h" />
+    <ClInclude Include="Code\Primitives.h" />
+    <ClInclude Include="Code\Model.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\LockScreenLogo.scale-200.png">
