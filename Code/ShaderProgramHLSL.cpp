@@ -6,8 +6,9 @@
 #include <synchapi.h>
 
 //--------------------------------------------------------------------------------------------------------------------
-ShaderProgramHLSL::ShaderProgramHLSL (const std::shared_ptr<DX::DeviceResources>& deviceResources) :
-	m_deviceResources(deviceResources)
+ShaderProgramHLSL::ShaderProgramHLSL (const std::shared_ptr<DX::DeviceResources>& deviceResources, ShaderPipelineType shaderPipelineType)
+	: m_deviceResources(deviceResources)
+	, m_shaderPipelineType(shaderPipelineType)
 {
 }
 

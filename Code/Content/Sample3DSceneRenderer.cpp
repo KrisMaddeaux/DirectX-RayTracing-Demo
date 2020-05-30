@@ -48,28 +48,44 @@ void Sample3DSceneRenderer::CreateDeviceDependentResources()
 		throw std::runtime_error("Raytracing not supported on device");
 	}
 
+	// Create a command list.
+	DX::ThrowIfFailed(m_deviceResources->GetD3DDevice()->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_deviceResources->GetCommandAllocator(), NULL, IID_PPV_ARGS(&m_commandList)));
+	NAME_D3D12_OBJECT(m_commandList);
+	DX::ThrowIfFailed(m_commandList->Close());
+
 	// Load shaders
-	m_shader = std::shared_ptr<ShaderProgramHLSL>(new ShaderProgramHLSL(m_deviceResources));
-	auto createVSTask = DX::ReadDataAsync(L"SampleVertexShader.cso").then([this](std::vector<byte>& fileData) {m_shader->SetVertexShader(fileData); });
-	auto createPSTask = DX::ReadDataAsync(L"SamplePixelShader.cso").then([this](std::vector<byte>& fileData) {m_shader->SetPixelShader(fileData); });
+	m_shaderRaster = std::shared_ptr<ShaderProgramHLSL>(new ShaderProgramHLSL(m_deviceResources, ShaderProgramHLSL::SHADER_PIPELINE_TYPE_RASTER));
+	auto createVSTaskRaster = DX::ReadDataAsync(L"SampleVertexShader.cso").then([this](std::vector<byte>& fileData) {m_shaderRaster->SetVertexShader(fileData); });
+	auto createPSTaskRaster = DX::ReadDataAsync(L"SamplePixelShader.cso").then([this](std::vector<byte>& fileData) {m_shaderRaster->SetPixelShader(fileData); });
+
+	m_shaderRaytrace = std::shared_ptr<ShaderProgramHLSL>(new ShaderProgramHLSL(m_deviceResources, ShaderProgramHLSL::SHADER_PIPELINE_TYPE_RAYTRACE));
+	auto createVSTaskRaytrace = DX::ReadDataAsync(L"SampleVertexShader.cso").then([this](std::vector<byte>& fileData) {m_shaderRaytrace->SetVertexShader(fileData); });
+	auto createPSTaskRaytrace = DX::ReadDataAsync(L"SamplePixelShader.cso").then([this](std::vector<byte>& fileData) {m_shaderRaytrace->SetPixelShader(fileData); });
 
 	// Setup shader programs
-	auto createPipelineStateTask = (createPSTask && createVSTask).then([this]()
+	auto createPipelineStateTask = (createVSTaskRaster && createPSTaskRaster && createVSTaskRaytrace && createPSTaskRaytrace).then([this]()
 	{
-		m_shader->Setup();
-		m_shader->ClearShaders(); // no longer need the data
+		m_shaderRaster->Setup();
+		m_shaderRaster->ClearShaders(); // no longer need the data
+
+		m_shaderRaytrace->Setup();
+		m_shaderRaytrace->ClearShaders(); // no longer need the data
 	});
 
 	// Create and upload cube geometry resources to the GPU.
 	auto createAssetsTask = createPipelineStateTask.then([this]()
 	{
-		std::shared_ptr<VertexPositionColor> pCubeVertices = Primitives::Cube::SetupCubeVertices(0.5f, 0.5f, 0.5f, Vec3f(1.0f, 0.0f, 0.0f));
+		std::shared_ptr<VertexPositionColor> pCubeVertices = Primitives::Cube::SetupCubeVertices(0.25f, 0.25f, 0.25f, Vec3f(1.0f, 0.0f, 0.0f));
 		const UINT vertexBufferSize = Primitives::Cube::CubeVerticesArraySize * sizeof(VertexPositionColor);
 
 		std::shared_ptr<unsigned short> pCubeIndices = Primitives::Cube::SetupCubeIndices();
 		const UINT indexBufferSize = Primitives::Cube::CubeIndicesArraySize * sizeof(unsigned short);
 
-		m_cube = std::shared_ptr<Model>(new Model(m_deviceResources, pCubeVertices, vertexBufferSize, pCubeIndices, indexBufferSize, m_shader));
+		m_cubeRaster = std::shared_ptr<Model>(new Model(m_deviceResources, pCubeVertices, vertexBufferSize, pCubeIndices, indexBufferSize, m_shaderRaster));
+		m_cubeRaster->SetModelMatrix(m_cubeRaster->GetModelMatrix() * Translate(1.0f, 0.0f, 0.0f));
+
+		m_cubeRayTrace = std::shared_ptr<Model>(new Model(m_deviceResources, pCubeVertices, vertexBufferSize, pCubeIndices, indexBufferSize, m_shaderRaster));
+		m_cubeRayTrace->SetModelMatrix(m_cubeRayTrace->GetModelMatrix() * Translate(-1.0f, 0.0f, 0.0f));
 	});
 
 	createAssetsTask.then([this]()
@@ -127,19 +143,34 @@ void Sample3DSceneRenderer::Update(DX::StepTimer const& timer)
 		{
 			float radians = static_cast<float>(timer.GetElapsedSeconds()) * m_radiansPerSecond;
 			float degrees = RadiansToDegrees * radians;
-			Mat4f newModelMatrix = m_cube->GetModelMatrix() * RotateY(degrees);
-			m_cube->SetModelMatrix(newModelMatrix);
-		}
 
-		// Prepare to pass the updated model matrix to the shader.
-		XMStoreFloat4x4(&m_constantBufferData.model, m_cube->GetModelMatrixDirectX());
+			Mat4f newModelMatrixRaster = m_cubeRaster->GetModelMatrix() * RotateY(degrees);
+			m_cubeRaster->SetModelMatrix(newModelMatrixRaster);
+
+			Mat4f newModelMatrixRaytrace = m_cubeRayTrace->GetModelMatrix() * RotateY(degrees);
+			m_cubeRayTrace->SetModelMatrix(newModelMatrixRaytrace);
+		}
 
 		// Update view matrix
 		XMStoreFloat4x4(&m_constantBufferData.view, m_camera->GetViewMatrixDirectX());
 
-		// Update the constant buffer resource.
-		UINT8* destination = m_cube->GetMappedConstantBuffer() + (m_deviceResources->GetCurrentFrameIndex() * c_alignedConstantBufferSize);
-		memcpy(destination, &m_constantBufferData, sizeof(m_constantBufferData));
+		// Prepare to pass the updated model matrix to the shader.
+		{
+			XMStoreFloat4x4(&m_constantBufferData.model, m_cubeRaster->GetModelMatrixDirectX());
+
+			// Update the constant buffer resource.
+			UINT8* destination = m_cubeRaster->GetMappedConstantBuffer() + (m_deviceResources->GetCurrentFrameIndex() * c_alignedConstantBufferSize);
+			memcpy(destination, &m_constantBufferData, sizeof(m_constantBufferData));
+		}
+
+		// Prepare to pass the updated model matrix to the shader.
+		{
+			XMStoreFloat4x4(&m_constantBufferData.model, m_cubeRayTrace->GetModelMatrixDirectX());
+
+			// Update the constant buffer resource.
+			UINT8* destination = m_cubeRayTrace->GetMappedConstantBuffer() + (m_deviceResources->GetCurrentFrameIndex() * c_alignedConstantBufferSize);
+			memcpy(destination, &m_constantBufferData, sizeof(m_constantBufferData));
+		}
 	}
 }
 
@@ -164,10 +195,26 @@ bool Sample3DSceneRenderer::Render()
 
 	DX::ThrowIfFailed(m_deviceResources->GetCommandAllocator()->Reset());
 
-	m_cube->Render(&m_scissorRect);
+	// Setup command list to clear render target and stencil buffer
+	{
+		DX::ThrowIfFailed(m_commandList->Reset(m_deviceResources->GetCommandAllocator(), NULL));
+
+		D3D12_CPU_DESCRIPTOR_HANDLE renderTargetView = m_deviceResources->GetRenderTargetView();
+		D3D12_CPU_DESCRIPTOR_HANDLE depthStencilView = m_deviceResources->GetDepthStencilView();
+		m_commandList->ClearRenderTargetView(renderTargetView, DirectX::Colors::CornflowerBlue, 0, nullptr);
+		m_commandList->ClearDepthStencilView(depthStencilView, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+
+		DX::ThrowIfFailed(m_commandList->Close());
+	}
+
+	// Render objects
+	{
+		m_cubeRaster->Render(&m_scissorRect);
+		m_cubeRayTrace->Render(&m_scissorRect);
+	}
 
 	// Execute the command list.
-	ID3D12CommandList* ppCommandLists[] = { m_cube->GetCommandList() };
+	ID3D12CommandList* ppCommandLists[] = { m_commandList.Get(), m_cubeRaster->GetCommandList(), m_cubeRayTrace->GetCommandList() };
 	m_deviceResources->GetCommandQueue()->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
 
 	return true;

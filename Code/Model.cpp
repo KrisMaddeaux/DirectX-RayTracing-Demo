@@ -192,17 +192,25 @@ void Model::Render(D3D12_RECT* pScissorRect)
 		m_commandList->ResourceBarrier(1, &renderTargetResourceBarrier);
 
 		// Record drawing commands.
-		D3D12_CPU_DESCRIPTOR_HANDLE renderTargetView = m_deviceResources->GetRenderTargetView();
-		D3D12_CPU_DESCRIPTOR_HANDLE depthStencilView = m_deviceResources->GetDepthStencilView();
-		m_commandList->ClearRenderTargetView(renderTargetView, DirectX::Colors::CornflowerBlue, 0, nullptr);
-		m_commandList->ClearDepthStencilView(depthStencilView, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+		if (m_shader->GetShaderPipelineType() == ShaderProgramHLSL::SHADER_PIPELINE_TYPE_RASTER)
+		{
+			D3D12_CPU_DESCRIPTOR_HANDLE renderTargetView = m_deviceResources->GetRenderTargetView();
+			D3D12_CPU_DESCRIPTOR_HANDLE depthStencilView = m_deviceResources->GetDepthStencilView();
+			m_commandList->OMSetRenderTargets(1, &renderTargetView, false, &depthStencilView);
 
-		m_commandList->OMSetRenderTargets(1, &renderTargetView, false, &depthStencilView);
-
-		m_commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		m_commandList->IASetVertexBuffers(0, 1, &m_vertexBufferView);
-		m_commandList->IASetIndexBuffer(&m_indexBufferView);
-		m_commandList->DrawIndexedInstanced(36, 1, 0, 0, 0);
+			m_commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+			m_commandList->IASetVertexBuffers(0, 1, &m_vertexBufferView);
+			m_commandList->IASetIndexBuffer(&m_indexBufferView);
+			m_commandList->DrawIndexedInstanced(36, 1, 0, 0, 0);
+		}
+		else if (m_shader->GetShaderPipelineType() == ShaderProgramHLSL::SHADER_PIPELINE_TYPE_RAYTRACE)
+		{
+			// Do raytracing stuff!
+		}
+		else
+		{
+			assert(false && "Invalid Shader Pipeline Type!");
+		}
 
 		// Indicate that the render target will now be used to present when the command list is done executing.
 		CD3DX12_RESOURCE_BARRIER presentResourceBarrier =

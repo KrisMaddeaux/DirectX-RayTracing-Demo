@@ -9,7 +9,13 @@
 class ShaderProgramHLSL
 {
 public:
-	ShaderProgramHLSL(const std::shared_ptr<DX::DeviceResources>& deviceResources); //Constructor
+	enum ShaderPipelineType
+	{
+		SHADER_PIPELINE_TYPE_RASTER,
+		SHADER_PIPELINE_TYPE_RAYTRACE
+	};
+
+	ShaderProgramHLSL(const std::shared_ptr<DX::DeviceResources>& deviceResources, ShaderPipelineType shaderPipelineType); //Constructor
 	
 	void Setup();
 
@@ -21,6 +27,11 @@ public:
 	ID3D12PipelineState* GetPipelineState() const
 	{
 		return m_pipelineState.Get();
+	}
+
+	ShaderPipelineType GetShaderPipelineType()
+	{
+		return m_shaderPipelineType;
 	}
 
 	void SetVertexShader(std::vector<byte>& vertexShader)
@@ -48,4 +59,6 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12RootSignature> m_rootSignature;
 	std::shared_ptr<DX::DeviceResources> m_deviceResources;
 	Microsoft::WRL::ComPtr<ID3D12PipelineState> m_pipelineState;
+
+	ShaderPipelineType m_shaderPipelineType;
 };

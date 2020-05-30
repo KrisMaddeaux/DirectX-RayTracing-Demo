@@ -10,7 +10,7 @@
 class Model
 {
 public:
-    Model(const std::shared_ptr<DX::DeviceResources>& deviceResources, 
+    Model(const std::shared_ptr<DX::DeviceResources>& deviceResources,
         std::shared_ptr<DirectX_RayTracing_Demo::VertexPositionColor> pVertices, 
         const int verticesArraySize,
         std::shared_ptr<unsigned short> pIndices, 
@@ -33,7 +33,7 @@ public:
 
     DirectX::XMMATRIX GetModelMatrixDirectX()
     {
-        return XMMatrixTranspose(DirectX::XMMATRIX(m_modelMatrix.m));
+        return DirectX::XMMATRIX(m_modelMatrix.m);
     }
 
     ID3D12GraphicsCommandList* GetCommandList() const

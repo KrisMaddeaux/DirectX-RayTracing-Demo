@@ -34,11 +34,14 @@ namespace DirectX_RayTracing_Demo
 
 		std::shared_ptr<Camera> m_camera;
 
-		std::shared_ptr<ShaderProgramHLSL> m_shader;
+		std::shared_ptr<ShaderProgramHLSL> m_shaderRaster;
+		std::shared_ptr<ShaderProgramHLSL> m_shaderRaytrace;
 
-		std::shared_ptr<Model> m_cube;
+		std::shared_ptr<Model> m_cubeRaster;
+		std::shared_ptr<Model> m_cubeRayTrace;
 
 		// Direct3D resources for cube geometry.
+		Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4>	m_commandList;
 		ModelViewProjectionConstantBuffer					m_constantBufferData;
 		D3D12_RECT											m_scissorRect;
 
